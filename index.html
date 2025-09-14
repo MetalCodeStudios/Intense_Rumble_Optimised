@@ -62,7 +62,7 @@ async def custom_site():
     import embed
 
 
-    platform.document.body.style.background = "#7f7f7f"
+    platform.document.body.style.background = "#3f007f"
 
     import pygame
 
@@ -302,6 +302,7 @@ config = {
             right: 0;
         }
 
+
         body {
             font-family: arial;
             margin: 0;
@@ -354,6 +355,48 @@ config = {
             <progress value="0" max="100" id="progress"></progress>
         </div>
     </div>
+    <audio id="bgmusic" src="music2.mp3" loop></audio>
+   <script>
+(function() {
+    const audio = document.getElementById("bgmusic");
+    if (!audio) return;
+
+    audio.volume = 1.0;
+
+    // Try autoplay first
+    audio.play().catch(() => {
+        console.log("Autoplay blocked, creating hidden unlock zone...");
+
+        // Create invisible full-screen div to capture first tap
+        const unlockZone = document.createElement("div");
+        unlockZone.style.position = "fixed";
+        unlockZone.style.top = 0;
+        unlockZone.style.left = 0;
+        unlockZone.style.width = "100vw";
+        unlockZone.style.height = "100vh";
+        unlockZone.style.background = "#FFFFFF";
+        unlockZone.style.zIndex = "9999";
+        document.body.appendChild(unlockZone);
+
+        function unlock() {
+            audio.play().then(() => {
+                console.log("Audio started via hidden tap!");
+                unlockZone.remove(); // Remove the invisible zone
+            }).catch(err => {
+                console.error("Audio playback failed:", err);
+            });
+        }
+
+        // Use both touchstart and click for iOS reliability
+        unlockZone.addEventListener("touchstart", unlock, { once: true });
+        unlockZone.addEventListener("click", unlock, { once: true });
+    });
+})();
+</script>
+
+
+
+
 
 
     <canvas class="emscripten" id="canvas"
@@ -361,6 +404,38 @@ width="1px"
 height="1px"
     oncontextmenu="event.preventDefault()" tabindex=1>
     </canvas>
+
+    <video id="bgvideo" autoplay muted playsinline
+       style="
+           position: absolute;
+           display: none;
+           z-index: 0;
+           top: 0;
+           left: 0;
+           width: 70%;
+           height: 70%;
+           object-fit: cover;
+           transition: opacity 1s ease-in-out;">
+      <source src="video.mp4" type="video/mp4">
+    </video>
+
+    <script>
+      const video = document.getElementById('bgvideo');
+
+      video.addEventListener('ended', function () {
+        // Fade out by setting opacity to 0
+        video.style.opacity = '0';
+
+        // After transition ends, hide the video from layout
+        video.addEventListener('transitionend', function handler() {
+          video.style.display = 'none';
+          video.removeEventListener('transitionend', handler);
+        });
+      });
+    </script>
+
+
+
 
     <div id=html></div>
 
